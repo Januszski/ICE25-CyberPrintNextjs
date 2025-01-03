@@ -1,4 +1,4 @@
-import Header from "./components/header";
+import GetPrintingButton from "./components/get-printing-button";
 import ServicesSlideshow from "./components/services-slideshow";
 
 export default function Home() {
@@ -16,7 +16,6 @@ export default function Home() {
 
       {/* Main content */}
       <div className="relative z-10">
-        <Header />
         <main className="container mx-auto px-4 py-12">
           <section className="text-center mb-16">
             <h1 className="text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
@@ -62,6 +61,9 @@ export default function Home() {
                   quality.
                 </p>
               </div>
+            </div>
+            <div className="text-center mt-20">
+              <GetPrintingButton />
             </div>
           </section>
         </main>
