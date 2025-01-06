@@ -3,8 +3,8 @@ import Keycloak from "keycloak-js";
 
 const initOptions = {
   url: "http://localhost:8080/",
-  realm: "employees",
-  clientId: "business-website",
+  realm: "3d Print Pro",
+  clientId: "business-webapp",
 };
 
 const kc = new Keycloak(initOptions);

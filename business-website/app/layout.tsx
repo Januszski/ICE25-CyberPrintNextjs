@@ -4,6 +4,9 @@ import "./globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import KeycloakProvider from "./components/keycloak-provider";
+import { Providers } from "./Providers";
+import SessionGuard from "./SessionGuard";
+import { initializeKeycloak } from "./lib/keycloak";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,9 +33,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
-        <KeycloakProvider>{children}</KeycloakProvider>
-        <Footer />
+        <Providers>
+          <SessionGuard>
+            <Header />
+            {children}
+            <Footer />
+          </SessionGuard>
+        </Providers>
       </body>
     </html>
   );

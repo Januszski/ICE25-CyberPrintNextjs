@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -12,9 +12,22 @@ import {
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
-import { Printer, LockIcon, CreditCard, LogIn, Loader2 } from "lucide-react";
+import {
+  BadgeDollarSign,
+  Printer,
+  LockIcon,
+  CreditCard,
+  LogIn,
+  Loader2,
+  MapPin,
+} from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Checkbox } from "../components/ui/checkbox";
+import { useAtom } from "jotai";
+import { signedInAtom, signedInUserInfoAtom } from "../atom.js";
+import kc from "../lib/keycloak";
+import { signIn, signOut } from "next-auth/react";
+import federatedLogout from "../lib/federatedLogout";
 
 // Mock saved cards data
 const savedCards = [
@@ -24,14 +37,14 @@ const savedCards = [
 
 export function Stwipez() {
   const router = useRouter();
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [saveCard, setSaveCard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [signedIn, setSignedIn] = useAtom(signedInAtom);
+  const [signedInUserInfo, setSignedInUserInfo] = useAtom(signedInUserInfoAtom);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -56,24 +69,42 @@ export function Stwipez() {
     );
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     // Mock sign-in process
-    setIsSignedIn(true);
+    signIn("keycloak");
   };
+
+  useEffect(() => {
+    console.log("signedIn updated: ", signedIn);
+  }, [signedIn]);
+
+  useEffect(() => {
+    console.log("kc auth state on page load: ", kc.authenticated);
+  }, []);
 
   return (
     <Card className="w-full max-w-md bg-gradient-to-br from-gray-800 to-blue-900 shadow-xl border border-blue-500/20">
+      <Button
+        onClick={() => {
+          console.log("AUTHENITCATED? ", kc.authenticated);
+          console.log("Does state show we are authenticated? ", signedIn);
+          federatedLogout();
+        }}
+      >
+        {" "}
+        TEST BUTTON
+      </Button>
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-white">
           <span className="flex items-center">
-            <Printer className="mr-2 h-6 w-6 text-blue-400" />
+            <BadgeDollarSign className="mr-2 h-6 w-6 text-blue-400" />
             Stwipez Payment
           </span>
           <LockIcon className="h-5 w-5 text-green-400" />
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {!isSignedIn && (
+        {!signedIn && (
           <div className="mb-6">
             <Button
               onClick={handleSignIn}
@@ -86,7 +117,7 @@ export function Stwipez() {
             </p>
           </div>
         )}
-        {isSignedIn && savedCards.length > 0 && (
+        {signedIn && savedCards.length > 0 && (
           <div className="mb-6">
             <Label className="text-blue-100 mb-2 block">
               Select a saved card
@@ -129,7 +160,7 @@ export function Stwipez() {
             </RadioGroup>
           </div>
         )}
-        {(!isSignedIn || selectedCard === "new") && (
+        {(!signedIn || selectedCard === "new") && (
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -176,7 +207,7 @@ export function Stwipez() {
                   />
                 </div>
               </div>
-              {isSignedIn && selectedCard === "new" && (
+              {signedIn && selectedCard === "new" && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="save-card"
