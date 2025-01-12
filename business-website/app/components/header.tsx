@@ -1,7 +1,12 @@
+"use client";
 import Link from "next/link";
 import { PrinterIcon as Printer3d } from "lucide-react";
-
+import { authOptions } from "../api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth/next";
+import { signIn, signOut, useSession } from "next-auth/react";
+import federatedLogout from "../lib/federatedLogout";
 export default function Header() {
+  const { data: session, status } = useSession();
   return (
     <header className="bg-gray-800 text-white shadow-lg border-b border-blue-500">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -26,7 +31,7 @@ export default function Header() {
                 href="#services"
                 className="hover:text-blue-400 transition duration-300"
               >
-                MyPrint
+                Print
               </Link>
             </li>
             <li>
@@ -38,12 +43,14 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link
-                href="/sign-in"
+              <button
                 className="hover:text-blue-400 transition duration-300"
+                onClick={() =>
+                  session ? federatedLogout() : signIn("keycloak")
+                }
               >
-                Sign In
-              </Link>
+                {session ? "Sign out" : "Sign in"}
+              </button>
             </li>
           </ul>
         </nav>

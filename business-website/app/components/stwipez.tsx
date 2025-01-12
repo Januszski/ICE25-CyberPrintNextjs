@@ -26,7 +26,7 @@ import { Checkbox } from "../components/ui/checkbox";
 import { useAtom } from "jotai";
 import { signedInAtom, signedInUserInfoAtom } from "../atom.js";
 import kc from "../lib/keycloak";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import federatedLogout from "../lib/federatedLogout";
 
 // Mock saved cards data
@@ -43,8 +43,7 @@ export function Stwipez() {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [saveCard, setSaveCard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [signedIn, setSignedIn] = useAtom(signedInAtom);
-  const [signedInUserInfo, setSignedInUserInfo] = useAtom(signedInUserInfoAtom);
+  const { data: session, status } = useSession();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -74,21 +73,28 @@ export function Stwipez() {
     signIn("keycloak");
   };
 
-  useEffect(() => {
-    console.log("signedIn updated: ", signedIn);
-  }, [signedIn]);
-
-  useEffect(() => {
-    console.log("kc auth state on page load: ", kc.authenticated);
-  }, []);
+  if (status === "loading") {
+    return (
+      <Card className="w-full max-w-md bg-gradient-to-br from-gray-800 to-blue-900 shadow-xl border border-blue-500/20">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between text-white">
+            <span className="flex items-center">
+              <BadgeDollarSign className="mr-2 h-6 w-6 text-blue-400" />
+              Stwipe Payment
+            </span>
+            <LockIcon className="h-5 w-5 text-green-400" />
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md bg-gradient-to-br from-gray-800 to-blue-900 shadow-xl border border-blue-500/20">
       <Button
         onClick={() => {
-          console.log("AUTHENITCATED? ", kc.authenticated);
-          console.log("Does state show we are authenticated? ", signedIn);
-          federatedLogout();
+          console.log("AUTHENITCATED? ", status);
+          console.log("INFO", session);
         }}
       >
         {" "}
@@ -98,13 +104,13 @@ export function Stwipez() {
         <CardTitle className="flex items-center justify-between text-white">
           <span className="flex items-center">
             <BadgeDollarSign className="mr-2 h-6 w-6 text-blue-400" />
-            Stwipez Payment
+            Stwipe Payment
           </span>
           <LockIcon className="h-5 w-5 text-green-400" />
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {!signedIn && (
+        {!session && (
           <div className="mb-6">
             <Button
               onClick={handleSignIn}
@@ -117,7 +123,7 @@ export function Stwipez() {
             </p>
           </div>
         )}
-        {signedIn && savedCards.length > 0 && (
+        {session && savedCards.length > 0 && (
           <div className="mb-6">
             <Label className="text-blue-100 mb-2 block">
               Select a saved card
@@ -160,7 +166,7 @@ export function Stwipez() {
             </RadioGroup>
           </div>
         )}
-        {(!signedIn || selectedCard === "new") && (
+        {(!session || selectedCard === "new") && (
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -207,7 +213,7 @@ export function Stwipez() {
                   />
                 </div>
               </div>
-              {signedIn && selectedCard === "new" && (
+              {session && selectedCard === "new" && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="save-card"

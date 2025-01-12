@@ -1,4 +1,5 @@
 import { AuthOptions, TokenSet } from "next-auth";
+import { jwtDecode } from "jwt-decode";
 import { JWT } from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import KeycloakProvider from "next-auth/providers/keycloak";
@@ -34,12 +35,14 @@ export const authOptions: AuthOptions = {
     maxAge: 60 * 30,
   },
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       if (account) {
         token.idToken = account.id_token;
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
+        token.decoded = jwtDecode(account.access_token);
+
         return token;
       }
       if (Date.now() < token.expiresAt! * 1000 - 60 * 1000) {
@@ -71,6 +74,7 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       session.accessToken = token.accessToken;
       session.error = token.error;
+      session.user = token.decoded;
       return session;
     },
   },
