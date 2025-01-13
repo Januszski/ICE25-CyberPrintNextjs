@@ -1,6 +1,7 @@
 "use client";
 
-import { Stwipez } from "../components/stwipez";
+import { useSearchParams } from "next/navigation";
+import { Stwipe } from "../components/stwipe";
 import {
   Card,
   CardContent,
@@ -8,8 +9,40 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { PrinterIcon as Printer3D, Package, Truck } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function PaymentPage() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId");
+  const [orderData, setOrderData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const SERVICE_FEE = 7.25;
+  useEffect(() => {
+    if (!orderId) return;
+
+    const fetchOrderInfo = async () => {
+      try {
+        const response = await fetch(`/api/order-info?orderId=${orderId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch order information");
+        }
+        const data = await response.json();
+        console.log("ORDER DATA ", data);
+        setOrderData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderInfo();
+  }, [orderId]);
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Complex background */}
@@ -35,19 +68,21 @@ export default function PaymentPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">3D Model Printing</span>
-                    <span>$149.99</span>
+                    <span>{orderData?.product_name}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Material Cost</span>
-                    <span>$29.99</span>
+                    <span>${orderData?.price}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Service Fee</span>
-                    <span>$20.00</span>
+                    <span>${SERVICE_FEE.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center pt-4 border-t border-blue-500/30">
                     <span className="font-bold">Total</span>
-                    <span className="font-bold">$199.98</span>
+                    <span className="font-bold">
+                      ${(parseFloat(orderData?.price) + SERVICE_FEE).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -84,9 +119,45 @@ export default function PaymentPage() {
           </div>
 
           <div>
-            <Stwipez />
+            <Stwipe />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <h2 className="text-2xl font-semibold text-white mb-2">
+          Loading Your Order
+        </h2>
+        <p className="text-blue-200">
+          Please wait while we fetch your order details...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ErrorState({ message }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-red-500 text-6xl mb-4">⚠️</div>
+        <h2 className="text-2xl font-semibold text-white mb-2">
+          Oops! Something went wrong
+        </h2>
+        <p className="text-blue-200 mb-4">{message}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Try Again
+        </button>
       </div>
     </div>
   );

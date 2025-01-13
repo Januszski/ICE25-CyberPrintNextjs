@@ -2,14 +2,7 @@ import { NextResponse } from "next/server";
 import mysql from "mysql2/promise";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
-
-// Database connection pool
-const pool = mysql.createPool({
-  host: "localhost",
-  user: "your_username",
-  password: "your_password",
-  database: "your_database",
-});
+import pool from "../../lib/pool";
 
 let client: jwksClient.JwksClient;
 
@@ -40,7 +33,7 @@ async function validateToken(token: string): Promise<number | null> {
 
     const decoded = jwt.verify(token, publicKey);
 
-    return decoded.userId; // Return the user ID from the token
+    return decoded.email; // Return the user ID from the token
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;
@@ -60,6 +53,8 @@ export async function GET(req: Request) {
     const token = authHeader.split(" ")[1];
     const userId = await validateToken(token);
 
+    console.log("TOKEN: ", token);
+    console.log("USERID ", userId);
     if (!userId) {
       return NextResponse.json(
         { error: "Invalid or expired token" },
@@ -67,9 +62,10 @@ export async function GET(req: Request) {
       );
     }
 
-    const [rows] = await pool.query("SELECT * FROM payments WHERE userId = ?", [
-      userId,
-    ]);
+    const [rows] = await pool.query(
+      "SELECT * FROM payment_details WHERE email = ?",
+      [userId],
+    );
 
     if (rows.length === 0) {
       return NextResponse.json(

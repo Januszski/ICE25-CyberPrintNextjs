@@ -8,10 +8,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
+} from "./ui/card";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
 import {
   BadgeDollarSign,
   Printer,
@@ -21,8 +21,8 @@ import {
   Loader2,
   MapPin,
 } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
-import { Checkbox } from "../components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Checkbox } from "./ui/checkbox";
 import { useAtom } from "jotai";
 import { signedInAtom, signedInUserInfoAtom } from "../atom.js";
 import kc from "../lib/keycloak";
@@ -35,7 +35,7 @@ const savedCards = [
   { id: 2, last4: "5555", brand: "Mastercard" },
 ];
 
-export function Stwipez() {
+export function Stwipe() {
   const router = useRouter();
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
