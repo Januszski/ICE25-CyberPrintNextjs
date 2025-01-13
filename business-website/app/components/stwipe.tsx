@@ -44,6 +44,37 @@ export function Stwipe() {
   const [saveCard, setSaveCard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [paymentInfo, setPaymentInfo] = useState(null);
+
+  useEffect(() => {
+    const token = session?.accessToken;
+    console.log("TOKEN ACCESS HERE ", token);
+    const fetchPaymentInfo = async () => {
+      try {
+        const response = await fetch(`/api/payment-info`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch order information");
+        }
+        const data = await response.json();
+        console.log("ORDER DATA ", data);
+        setPaymentInfo(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) fetchPaymentInfo();
+  }, [session, status]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
