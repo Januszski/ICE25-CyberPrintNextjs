@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import mysql from "mysql2/promise";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
@@ -19,7 +18,7 @@ async function getSigningKey(kid: string): Promise<string> {
   });
 }
 
-async function validateToken(token: string): Promise<number | null> {
+async function validateToken(token: string): Promise<string | null> {
   try {
     const decodedHeader = jwt.decode(token, { complete: true });
     if (!decodedHeader || typeof decodedHeader === "string") {
@@ -31,9 +30,9 @@ async function validateToken(token: string): Promise<number | null> {
     client = jwksClient({ jwksUri: `${iss}/protocol/openid-connect/certs` });
     const publicKey = await getSigningKey(kid!);
 
-    const decoded = jwt.verify(token, publicKey);
+    const decoded = jwt.verify(token, publicKey) as JwtPayload;
 
-    return decoded.email; // Return the user ID from the token
+    return decoded.email as string; // Return the user email from the token
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;
@@ -44,8 +43,8 @@ export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Authorization header missing or invalid" },
+      return new Response(
+        JSON.stringify({ error: "Authorization header missing or invalid" }),
         { status: 401 },
       );
     }
@@ -54,31 +53,43 @@ export async function GET(req: Request) {
     const userId = await validateToken(token);
 
     console.log("TOKEN: ", token);
-    console.log("USERID ", userId);
+    console.log("USERID: ", userId);
     if (!userId) {
-      return NextResponse.json(
-        { error: "Invalid or expired token" },
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired token" }),
         { status: 403 },
       );
     }
 
+    // Query to get the card info associated with the user
     const [rows] = await pool.query(
-      "SELECT * FROM payment_details WHERE email = ?",
+      `
+      SELECT 
+        cards.card_number,
+        cards.expiration_date,
+        cards.cvc
+      FROM 
+        cards
+      JOIN 
+        user_cards ON cards.id = user_cards.card_id
+      WHERE 
+        user_cards.user_id = ?
+      `,
       [userId],
     );
 
     if (rows.length === 0) {
-      return NextResponse.json(
-        { error: "Payment info not found" },
+      return new Response(
+        JSON.stringify({ error: "No cards found for this user" }),
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ paymentInfo: rows[0] }, { status: 200 });
+    return new Response(JSON.stringify({ cards: rows }), { status: 200 });
   } catch (error) {
-    console.error("Error fetching payment info:", error);
-    return NextResponse.json(
-      { error: "An error occurred while fetching payment info" },
+    console.error("Error fetching card info:", error);
+    return new Response(
+      JSON.stringify({ error: "An error occurred while fetching card info" }),
       { status: 500 },
     );
   }

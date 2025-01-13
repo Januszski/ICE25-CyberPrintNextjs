@@ -35,6 +35,16 @@ const savedCards = [
   { id: 2, last4: "5555", brand: "Mastercard" },
 ];
 
+interface Card {
+  card_number: string;
+  expiration_date: string;
+  cvc: string;
+}
+
+interface PaymentInfo {
+  cards: Card[];
+}
+
 export function Stwipe() {
   const router = useRouter();
   const [cardNumber, setCardNumber] = useState("");
@@ -154,7 +164,7 @@ export function Stwipe() {
             </p>
           </div>
         )}
-        {session && savedCards.length > 0 && (
+        {paymentInfo && paymentInfo.cards.length > 0 && (
           <div className="mb-6">
             <Label className="text-blue-100 mb-2 block">
               Select a saved card
@@ -164,21 +174,21 @@ export function Stwipe() {
               onValueChange={setSelectedCard}
               className="space-y-3"
             >
-              {savedCards.map((card) => (
+              {paymentInfo.cards.map((card, index) => (
                 <Label
-                  key={card.id}
-                  htmlFor={`card-${card.id}`}
+                  key={index}
+                  htmlFor={`card-${index}`}
                   className="flex items-center space-x-3 bg-gray-700/30 p-3 rounded-md cursor-pointer hover:bg-gray-600/30 transition-colors"
                 >
                   <RadioGroupItem
-                    value={card.id.toString()}
-                    id={`card-${card.id}`}
+                    value={card.card_number}
+                    id={`card-${index}`}
                     className="border-blue-400 text-blue-400"
                   />
                   <CreditCard className="h-6 w-6 text-blue-400" />
                   <span className="text-blue-100 flex items-center">
-                    <span className="mr-2">💳</span> {card.brand} ending in{" "}
-                    {card.last4}
+                    <span className="mr-2"></span> Card ending in{" "}
+                    {card.card_number.slice(-4)}
                   </span>
                 </Label>
               ))}
