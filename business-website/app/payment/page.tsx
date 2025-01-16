@@ -67,12 +67,14 @@ export default function PaymentPage() {
               <CardContent className="text-blue-100">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold">3D Model Printing</span>
-                    <span>{orderData?.product_name}</span>
+                    <span className="font-semibold">3D Model Name</span>
+                    <span className="font-semibold">
+                      {orderData?.order?.product_name}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Material Cost</span>
-                    <span>${orderData?.price}</span>
+                    <span>${orderData?.order?.price}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Service Fee</span>
@@ -81,7 +83,10 @@ export default function PaymentPage() {
                   <div className="flex justify-between items-center pt-4 border-t border-blue-500/30">
                     <span className="font-bold">Total</span>
                     <span className="font-bold">
-                      ${(parseFloat(orderData?.price) + SERVICE_FEE).toFixed(2)}
+                      $
+                      {(
+                        parseFloat(orderData?.order?.price) + SERVICE_FEE
+                      ).toFixed(2)}
                     </span>
                   </div>
                 </div>

@@ -57,6 +57,22 @@ export function Stwipe() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState(null);
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  useEffect(() => {
+    // Validate the form
+    const isValidCardNumber =
+      cardNumber.length === 16 && /^\d+$/.test(cardNumber);
+    const isValidExpiry = /^\d{2} \/ \d{2}$/.test(expiry);
+    const isValidCVC = cvc.length === 3 && /^\d+$/.test(cvc);
+
+    // If a saved card is selected, form is valid
+    if (selectedCard !== "new") {
+      setIsFormValid(true);
+    } else {
+      setIsFormValid(isValidCardNumber && isValidExpiry && isValidCVC);
+    }
+  }, [cardNumber, expiry, cvc, selectedCard]);
 
   useEffect(() => {
     const token = session?.accessToken;
@@ -84,7 +100,33 @@ export function Stwipe() {
 
     if (token) fetchPaymentInfo();
   }, [session, status]);
+  const handleCardNumberChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // Allow only digits
+    if (value.length <= 16) setCardNumber(value);
+  };
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
 
+    // Remove non-digit characters
+    value = value.replace(/\D/g, "");
+
+    // Allow deletion without reformatting
+    if (value.length <= 2) {
+      setExpiry(value);
+      return;
+    }
+
+    // Format as MM / YY
+    if (value.length > 2) {
+      value = value.slice(0, 2) + " / " + value.slice(2, 4);
+    }
+
+    setExpiry(value);
+  };
+  const handleCvcChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // Allow only digits
+    if (value.length <= 3) setCvc(value);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -214,17 +256,14 @@ export function Stwipe() {
                 <Label htmlFor="card-number" className="text-blue-100">
                   Card number
                 </Label>
-                <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300 h-5 w-5" />
-                  <Input
-                    id="card-number"
-                    placeholder="1234 5678 9012 3456"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    className="pl-10 bg-gray-800/50 text-white placeholder:text-blue-200 border-blue-500/30 focus:border-blue-400"
-                    required
-                  />
-                </div>
+                <Input
+                  id="card-number"
+                  placeholder="1234 5678 9012 3456"
+                  value={cardNumber}
+                  onChange={handleCardNumberChange}
+                  className="bg-gray-800/50 text-white placeholder:text-blue-200 border-blue-500/30 focus:border-blue-400"
+                  required
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -233,9 +272,9 @@ export function Stwipe() {
                   </Label>
                   <Input
                     id="expiry"
-                    placeholder="MM / YY"
+                    placeholder="MM/YY"
                     value={expiry}
-                    onChange={(e) => setExpiry(e.target.value)}
+                    onChange={handleExpiryChange}
                     className="bg-gray-800/50 text-white placeholder:text-blue-200 border-blue-500/30 focus:border-blue-400"
                     required
                   />
@@ -248,12 +287,13 @@ export function Stwipe() {
                     id="cvc"
                     placeholder="123"
                     value={cvc}
-                    onChange={(e) => setCvc(e.target.value)}
+                    onChange={handleCvcChange}
                     className="bg-gray-800/50 text-white placeholder:text-blue-200 border-blue-500/30 focus:border-blue-400"
                     required
                   />
                 </div>
               </div>
+
               {session && selectedCard === "new" && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -276,7 +316,7 @@ export function Stwipe() {
         <Button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           onClick={handleSubmit}
-          disabled={isLoading}
+          disabled={!isFormValid || isLoading}
         >
           {isLoading ? (
             <>
