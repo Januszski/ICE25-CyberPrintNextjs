@@ -28,7 +28,8 @@ import { signedInAtom, signedInUserInfoAtom } from "../atom.js";
 import kc from "../lib/keycloak";
 import { signIn, signOut, useSession } from "next-auth/react";
 import federatedLogout from "../lib/federatedLogout";
-
+import { paymentDetailsAtom, orderDetailsAtom } from "../atom.js";
+import dayjs from "dayjs";
 // Mock saved cards data
 const savedCards = [
   { id: 1, last4: "4242", brand: "Visa" },
@@ -58,12 +59,14 @@ export function Stwipe() {
   const [error, setError] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useAtom(paymentDetailsAtom);
+  const [orderDetails, setOrderDetails] = useAtom(orderDetailsAtom);
 
   useEffect(() => {
     // Validate the form
     const isValidCardNumber =
       cardNumber.length === 16 && /^\d+$/.test(cardNumber);
-    const isValidExpiry = /^\d{2} \/ \d{2}$/.test(expiry);
+    const isValidExpiry = /^\d{2}\/\d{2}$/.test(expiry);
     const isValidCVC = cvc.length === 3 && /^\d+$/.test(cvc);
 
     // If a saved card is selected, form is valid
@@ -118,7 +121,7 @@ export function Stwipe() {
 
     // Format as MM / YY
     if (value.length > 2) {
-      value = value.slice(0, 2) + " / " + value.slice(2, 4);
+      value = value.slice(0, 2) + "/" + value.slice(2, 4);
     }
 
     setExpiry(value);
@@ -127,30 +130,54 @@ export function Stwipe() {
     const value = e.target.value.replace(/\D/g, ""); // Allow only digits
     if (value.length <= 3) setCvc(value);
   };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsLoading(true);
 
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // Mock order details
-    const orderDetails = {
-      orderId: Math.random().toString(36).substr(2, 9),
-      amount: 199.98,
-      cardLast4:
-        selectedCard === "new"
-          ? cardNumber.slice(-4)
-          : savedCards.find((card) => card.id.toString() === selectedCard)
-              ?.last4,
+    const submitData = {
+      orderId: orderDetails?.order?.guid, // Replace with actual data from your atom
+      amount: parseFloat(orderDetails?.order?.price), // Replace with actual data from your atom
+      productName: orderDetails?.order?.product_name, // Replace with actual data from your atom
+      fileName: orderDetails?.order?.filename, // Replace with actual data from your atom
+      cardNumber: cardNumber || paymentInfo?.cards[selectedCard]?.card_number,
+      expiry:
+        expiry ||
+        dayjs(paymentInfo?.cards[selectedCard]?.expiration_date).format(
+          "MM/YY",
+        ),
+      cvc: cvc || paymentInfo?.cards[selectedCard]?.cvc,
+      email: session?.user?.email || null,
+      saveCard,
     };
+    console.log("THIS IS WHAT IM SENDING: ", JSON.stringify(submitData));
+    try {
+      // Send order details to your backend
+      const response = await fetch("/api/submit-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submitData),
+      });
 
-    // Redirect to thank you page with order details
-    router.push(
-      `/thankyou?${new URLSearchParams(orderDetails as Record<string, string>).toString()}`,
-    );
+      if (!response.ok) {
+        throw new Error("Failed to submit order");
+      }
+
+      const result = await response.json();
+      console.log("Order submitted successfully:", result);
+
+      // Redirect to thank you page with order details
+      router.push(
+        `/thankyou?${new URLSearchParams(orderDetails?.order as Record<string, string>).toString()}`,
+      );
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      // Show error message to the user (optional)
+    } finally {
+      setIsLoading(false);
+    }
   };
-
   const handleSignIn = async () => {
     // Mock sign-in process
     signIn("keycloak");
@@ -206,34 +233,36 @@ export function Stwipe() {
             </p>
           </div>
         )}
-        {paymentInfo && paymentInfo.cards.length > 0 && (
+
+        {paymentInfo && (
           <div className="mb-6">
-            <Label className="text-blue-100 mb-2 block">
-              Select a saved card
-            </Label>
+            <Label className="text-blue-100 mb-2 block">Select a card</Label>
             <RadioGroup
               value={selectedCard}
               onValueChange={setSelectedCard}
               className="space-y-3"
             >
-              {paymentInfo.cards.map((card, index) => (
-                <Label
-                  key={index}
-                  htmlFor={`card-${index}`}
-                  className="flex items-center space-x-3 bg-gray-700/30 p-3 rounded-md cursor-pointer hover:bg-gray-600/30 transition-colors"
-                >
-                  <RadioGroupItem
-                    value={card.card_number}
-                    id={`card-${index}`}
-                    className="border-blue-400 text-blue-400"
-                  />
-                  <CreditCard className="h-6 w-6 text-blue-400" />
-                  <span className="text-blue-100 flex items-center">
-                    <span className="mr-2"></span> Card ending in{" "}
-                    {card.card_number.slice(-4)}
-                  </span>
-                </Label>
-              ))}
+              {/* Render saved cards if available */}
+              {paymentInfo.cards.length > 0 &&
+                paymentInfo.cards.map((card, index) => (
+                  <Label
+                    key={index}
+                    htmlFor={`card-${index}`}
+                    className="flex items-center space-x-3 bg-gray-700/30 p-3 rounded-md cursor-pointer hover:bg-gray-600/30 transition-colors"
+                  >
+                    <RadioGroupItem
+                      value={index}
+                      id={`card-${index}`}
+                      className="border-blue-400 text-blue-400"
+                    />
+                    <CreditCard className="h-6 w-6 text-blue-400" />
+                    <span className="text-blue-100 flex items-center">
+                      Card ending in {card.card_number.slice(-4)}
+                    </span>
+                  </Label>
+                ))}
+
+              {/* Always render the "Use a new card" option */}
               <Label
                 htmlFor="new-card"
                 className="flex items-center space-x-3 bg-gray-700/30 p-3 rounded-md cursor-pointer hover:bg-gray-600/30 transition-colors"
@@ -316,7 +345,7 @@ export function Stwipe() {
         <Button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           onClick={handleSubmit}
-          disabled={!isFormValid || isLoading}
+          disabled={!isFormValid || isLoading || selectedCard == null}
         >
           {isLoading ? (
             <>

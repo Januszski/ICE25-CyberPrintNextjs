@@ -1,5 +1,5 @@
 import { atom } from "jotai";
 
-export const signedInAtom = atom(false);
+export const paymentDetailsAtom = atom(null);
 
-export const signedInUserInfoAtom = atom(null);
+export const orderDetailsAtom = atom(null);

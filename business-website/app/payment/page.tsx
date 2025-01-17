@@ -10,6 +10,8 @@ import {
 } from "../components/ui/card";
 import { PrinterIcon as Printer3D, Package, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { orderDetailsAtom } from "../atom";
 
 export default function PaymentPage() {
   const searchParams = useSearchParams();
@@ -17,6 +19,7 @@ export default function PaymentPage() {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [orderDetails, setOrderDetails] = useAtom(orderDetailsAtom);
   const SERVICE_FEE = 7.25;
   useEffect(() => {
     if (!orderId) return;
@@ -30,6 +33,7 @@ export default function PaymentPage() {
         const data = await response.json();
         console.log("ORDER DATA ", data);
         setOrderData(data);
+        setOrderDetails(data);
       } catch (err) {
         setError(err.message);
       } finally {

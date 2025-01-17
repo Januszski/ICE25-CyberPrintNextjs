@@ -13,9 +13,9 @@ import Link from "next/link";
 
 export default function ThankYouPage() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId");
-  const amount = searchParams.get("amount");
-  const cardLast4 = searchParams.get("cardLast4");
+  const orderId = searchParams.get("guid");
+  const amount = parseFloat(searchParams.get("price")) + 7.25;
+  const name = searchParams.get("product_name");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4 relative overflow-hidden">
@@ -107,7 +107,7 @@ export default function ThankYouPage() {
               <p className="font-semibold">Order Details:</p>
               <p>Order ID: {orderId}</p>
               <p>Amount: ${amount}</p>
-              <p>Card ending in: {cardLast4}</p>
+              <p>Item name: {name}</p>
             </div>
             <p>We&apos;ll start processing your order right away!</p>
             <div className="pt-4">

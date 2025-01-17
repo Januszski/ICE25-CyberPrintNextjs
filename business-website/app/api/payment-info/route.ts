@@ -38,7 +38,6 @@ async function validateToken(token: string): Promise<string | null> {
     return null;
   }
 }
-
 export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get("Authorization");
@@ -78,19 +77,15 @@ export async function GET(req: Request) {
       [userId],
     );
 
-    if (rows.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "No cards found for this user" }),
-        { status: 404 },
-      );
-    }
-
-    return new Response(JSON.stringify({ cards: rows }), { status: 200 });
-  } catch (error) {
-    console.error("Error fetching card info:", error);
+    // Return an empty array if no cards are found
     return new Response(
-      JSON.stringify({ error: "An error occurred while fetching card info" }),
-      { status: 500 },
+      JSON.stringify({ cards: rows.length > 0 ? rows : [] }),
+      { status: 200 },
     );
+  } catch (error) {
+    console.error("Error occurred:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+    });
   }
 }
