@@ -14,7 +14,7 @@ import Link from "next/link";
 export default function ThankYouPage() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("guid");
-  const amount = parseFloat(searchParams.get("price")) + 7.25;
+  const amount = parseFloat(searchParams.get("price") as string) + 7.25;
   const name = searchParams.get("product_name");
 
   return (

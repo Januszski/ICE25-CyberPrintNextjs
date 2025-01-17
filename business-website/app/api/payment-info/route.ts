@@ -1,7 +1,7 @@
-import mysql from "mysql2/promise";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
 import pool from "../../lib/pool";
+import { RowDataPacket } from "mysql2";
 
 let client: jwksClient.JwksClient;
 
@@ -9,7 +9,7 @@ let client: jwksClient.JwksClient;
 async function getSigningKey(kid: string): Promise<string> {
   return new Promise((resolve, reject) => {
     client.getSigningKey(kid, (err, key) => {
-      if (err) {
+      if (err || !key) {
         return reject(err);
       }
       const signingKey = key.getPublicKey();
@@ -63,23 +63,23 @@ export async function GET(req: Request) {
     // Query to get the card info associated with the user
     const [rows] = await pool.query(
       `
-      SELECT 
-        cards.card_number,
-        cards.expiration_date,
-        cards.cvc
-      FROM 
-        cards
-      JOIN 
-        user_cards ON cards.id = user_cards.card_id
-      WHERE 
-        user_cards.user_id = ?
-      `,
-      [userId],
+  SELECT 
+    cards.card_number,
+    cards.expiration_date,
+    cards.cvc
+  FROM 
+    cards
+  JOIN 
+    user_cards ON cards.id = user_cards.card_id
+  WHERE 
+    user_cards.email = ?
+  `,
+      [userId], // Pass the email instead of userId
     );
-
+    const cardRows = rows as RowDataPacket[];
     // Return an empty array if no cards are found
     return new Response(
-      JSON.stringify({ cards: rows.length > 0 ? rows : [] }),
+      JSON.stringify({ cards: cardRows.length > 0 ? rows : [] }),
       { status: 200 },
     );
   } catch (error) {

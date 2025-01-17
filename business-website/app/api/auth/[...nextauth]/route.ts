@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { AuthOptions, TokenSet } from "next-auth";
 import { jwtDecode } from "jwt-decode";
 import { JWT } from "next-auth/jwt";
@@ -8,6 +7,7 @@ import KeycloakProvider from "next-auth/providers/keycloak";
 function requestRefreshOfAccessToken(token: JWT) {
   return fetch(`${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`, {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    // @ts-expect-error idk
     body: new URLSearchParams({
       client_id: process.env.KEYCLOAK_CLIENT_ID,
       client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
@@ -42,11 +42,11 @@ export const authOptions: AuthOptions = {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
-        token.decoded = jwtDecode(account?.access_token);
+        token.decoded = jwtDecode(account.access_token!);
 
         return token;
       }
-      if (Date.now() < token.expiresAt! * 1000 - 60 * 1000) {
+      if (Date.now() < (token.expiresAt as number) * 1000 - 60 * 1000) {
         return token;
       } else {
         try {
@@ -73,9 +73,9 @@ export const authOptions: AuthOptions = {
       }
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      session.error = token.error;
-      session.user = token.decoded;
+      session.accessToken = token.accessToken as string;
+      session.error = token.error as string;
+      session.user = token.decoded as Record<string, unknown>;
       return session;
     },
   },

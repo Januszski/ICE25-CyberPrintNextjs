@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "../../lib/pool";
 import { v4 as uuidv4 } from "uuid";
-interface Order {
-  guid: string;
-  price: number; // Ensure this is a number, not a string
-  product_name: string;
-  created_at: string;
-  filesize: number;
-  filename: string;
-  paid: boolean;
-}
+import { RowDataPacket, FieldPacket } from "mysql2";
+
 export async function GET(req: NextRequest) {
   try {
     // Get the order GUID from the query parameters
@@ -23,7 +16,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch the order information from the database
-    const [rows]: [Order[], any] = await pool.query(
+    const [rows]: [RowDataPacket[], FieldPacket[]] = await pool.query(
       "SELECT * FROM orders WHERE guid = ?",
       [orderGuid],
     );
@@ -98,13 +91,13 @@ export async function POST(req: NextRequest) {
     console.log("Generated GUID: ", guid);
 
     // Insert the new order with the generated GUID
-    const [result] = await pool.query(
+    await pool.query(
       "INSERT INTO orders (guid, price, product_name, created_at, filesize, filename, paid) VALUES (?, ?, ?, NOW(), ?, ?, FALSE)",
       [guid, price, creationName, fileSize, fileName],
     );
 
     // Fetch the newly created order's GUID and other details
-    const [rows]: [Order[]] = await pool.query(
+    const [rows]: [RowDataPacket[], FieldPacket[]] = await pool.query(
       "SELECT * FROM orders WHERE guid = ?",
       [guid],
     );

@@ -12,27 +12,17 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import {
   BadgeDollarSign,
-  Printer,
   LockIcon,
   CreditCard,
   LogIn,
   Loader2,
-  MapPin,
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Checkbox } from "./ui/checkbox";
 import { useAtom } from "jotai";
-import { signedInAtom, signedInUserInfoAtom } from "../atom.js";
-import kc from "../lib/keycloak";
-import { signIn, signOut, useSession } from "next-auth/react";
-import federatedLogout from "../lib/federatedLogout";
-import { paymentDetailsAtom, orderDetailsAtom } from "../atom.js";
+import { signIn, useSession } from "next-auth/react";
+import { orderDetailsAtom } from "../atom.js";
 import dayjs from "dayjs";
-// Mock saved cards data
-const savedCards = [
-  { id: 1, last4: "4242", brand: "Visa" },
-  { id: 2, last4: "5555", brand: "Mastercard" },
-];
 
 interface Card {
   card_number: string;
@@ -44,6 +34,14 @@ interface PaymentInfo {
   cards: Card[];
 }
 
+interface OrderDetails {
+  order: {
+    guid: string;
+    price: string;
+    product_name: string;
+    filename: string;
+  };
+}
 export function Stwipe() {
   const router = useRouter();
   const [cardNumber, setCardNumber] = useState("");
@@ -53,12 +51,11 @@ export function Stwipe() {
   const [saveCard, setSaveCard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null); // Added error state
-  const [paymentInfo, setPaymentInfo] = useState(null);
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
-  const [paymentDetails, setPaymentDetails] = useAtom(paymentDetailsAtom);
-  const [orderDetails, setOrderDetails] = useAtom(orderDetailsAtom);
+  const [orderDetails] = useAtom<OrderDetails | null>(orderDetailsAtom);
 
   useEffect(() => {
     // Validate the form
@@ -68,9 +65,12 @@ export function Stwipe() {
     const isValidCVC = cvc.length === 3 && /^\d+$/.test(cvc);
 
     // If a saved card is selected, form is valid
-    if (selectedCard !== "new") {
+    if (selectedCard !== "-1") {
       setIsFormValid(true);
     } else {
+      setIsFormValid(isValidCardNumber && isValidExpiry && isValidCVC);
+    }
+    if (selectedCard === null) {
       setIsFormValid(isValidCardNumber && isValidExpiry && isValidCVC);
     }
   }, [cardNumber, expiry, cvc, selectedCard]);
@@ -93,7 +93,11 @@ export function Stwipe() {
         console.log("ORDER DATA ", data);
         setPaymentInfo(data);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
       } finally {
         setLoading(false);
       }
@@ -101,7 +105,7 @@ export function Stwipe() {
 
     if (token) fetchPaymentInfo();
   }, [session, status]);
-  const handleCardNumberChange = (e) => {
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, ""); // Allow only digits
     if (value.length <= 16) setCardNumber(value);
   };
@@ -124,7 +128,7 @@ export function Stwipe() {
 
     setExpiry(value);
   };
-  const handleCvcChange = (e) => {
+  const handleCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, ""); // Allow only digits
     if (value.length <= 3) setCvc(value);
   };
@@ -132,17 +136,19 @@ export function Stwipe() {
     event.preventDefault();
     setIsLoading(true);
 
+    const fallbackSelectedCard: number = parseInt(selectedCard!) ?? 0;
     const submitData = {
       orderId: orderDetails?.order?.guid, // Replace with actual data from your atom
-      amount: parseFloat(orderDetails?.order?.price), // Replace with actual data from your atom
+      amount: parseFloat(orderDetails?.order?.price as string), // Replace with actual data from your atom
       productName: orderDetails?.order?.product_name, // Replace with actual data from your atom
       fileName: orderDetails?.order?.filename, // Replace with actual data from your atom
-      cardNumber: paymentInfo?.cards[selectedCard]?.card_number || cardNumber,
+      cardNumber:
+        paymentInfo?.cards[fallbackSelectedCard]?.card_number || cardNumber,
       expiry:
-        dayjs(paymentInfo?.cards[selectedCard]?.expiration_date).format(
+        dayjs(paymentInfo?.cards[fallbackSelectedCard]?.expiration_date).format(
           "MM/YY",
         ) || expiry,
-      cvc: paymentInfo?.cards[selectedCard]?.cvc || cvc,
+      cvc: paymentInfo?.cards[fallbackSelectedCard]?.cvc || cvc,
       email: session?.user?.email || null,
       saveCard,
     };
@@ -202,6 +208,9 @@ export function Stwipe() {
         onClick={() => {
           console.log("AUTHENITCATED? ", status);
           console.log("INFO", session);
+          console.log("isFormValid: ", isFormValid);
+          console.log("isLoading: ", isLoading);
+          console.log("selectedCard: ", selectedCard);
         }}
       >
         {" "}
@@ -236,7 +245,7 @@ export function Stwipe() {
           <div className="mb-6">
             <Label className="text-blue-100 mb-2 block">Select a card</Label>
             <RadioGroup
-              value={selectedCard}
+              value={selectedCard ?? undefined}
               onValueChange={setSelectedCard}
               className="space-y-3"
             >
@@ -249,7 +258,7 @@ export function Stwipe() {
                     className="flex items-center space-x-3 bg-gray-700/30 p-3 rounded-md cursor-pointer hover:bg-gray-600/30 transition-colors"
                   >
                     <RadioGroupItem
-                      value={index}
+                      value={String(index)}
                       id={`card-${index}`}
                       className="border-blue-400 text-blue-400"
                     />
@@ -266,7 +275,7 @@ export function Stwipe() {
                 className="flex items-center space-x-3 bg-gray-700/30 p-3 rounded-md cursor-pointer hover:bg-gray-600/30 transition-colors"
               >
                 <RadioGroupItem
-                  value="new"
+                  value={String(-1)}
                   id="new-card"
                   className="border-blue-400 text-blue-400"
                 />
@@ -276,7 +285,7 @@ export function Stwipe() {
             </RadioGroup>
           </div>
         )}
-        {(!session || selectedCard === "new") && (
+        {(!session || selectedCard === "-1") && (
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -321,7 +330,7 @@ export function Stwipe() {
                 </div>
               </div>
 
-              {session && selectedCard === "new" && (
+              {session && selectedCard === "-1" && (
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="save-card"
@@ -343,7 +352,9 @@ export function Stwipe() {
         <Button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white mb-4"
           onClick={handleSubmit}
-          disabled={!isFormValid || isLoading || selectedCard == null}
+          disabled={
+            !isFormValid || isLoading || (!!session && selectedCard === null)
+          }
         >
           {isLoading ? (
             <>
