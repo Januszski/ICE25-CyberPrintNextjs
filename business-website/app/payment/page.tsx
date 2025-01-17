@@ -1,5 +1,4 @@
 "use client";
-
 import { useSearchParams } from "next/navigation";
 import { Stwipe } from "../components/stwipe";
 import {
@@ -12,6 +11,7 @@ import { PrinterIcon as Printer3D, Package, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { orderDetailsAtom } from "../atom";
+import { PaidOrderScreen } from "../components/paid-order-screen";
 
 export default function PaymentPage() {
   const searchParams = useSearchParams();
@@ -21,6 +21,7 @@ export default function PaymentPage() {
   const [error, setError] = useState(null);
   const [orderDetails, setOrderDetails] = useAtom(orderDetailsAtom);
   const SERVICE_FEE = 7.25;
+
   useEffect(() => {
     if (!orderId) return;
 
@@ -46,6 +47,11 @@ export default function PaymentPage() {
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
+
+  // Check if the order has already been paid
+  if (orderData?.order?.paid) {
+    return <PaidOrderScreen orderData={orderData} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">

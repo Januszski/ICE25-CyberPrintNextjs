@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -56,7 +54,7 @@ export function Stwipe() {
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null); // Added error state
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const [paymentDetails, setPaymentDetails] = useAtom(paymentDetailsAtom);
@@ -139,13 +137,12 @@ export function Stwipe() {
       amount: parseFloat(orderDetails?.order?.price), // Replace with actual data from your atom
       productName: orderDetails?.order?.product_name, // Replace with actual data from your atom
       fileName: orderDetails?.order?.filename, // Replace with actual data from your atom
-      cardNumber: cardNumber || paymentInfo?.cards[selectedCard]?.card_number,
+      cardNumber: paymentInfo?.cards[selectedCard]?.card_number || cardNumber,
       expiry:
-        expiry ||
         dayjs(paymentInfo?.cards[selectedCard]?.expiration_date).format(
           "MM/YY",
-        ),
-      cvc: cvc || paymentInfo?.cards[selectedCard]?.cvc,
+        ) || expiry,
+      cvc: paymentInfo?.cards[selectedCard]?.cvc || cvc,
       email: session?.user?.email || null,
       saveCard,
     };
@@ -173,7 +170,7 @@ export function Stwipe() {
       );
     } catch (error) {
       console.error("Error submitting order:", error);
-      // Show error message to the user (optional)
+      setError("Unable to process payment, make sure fields are valid");
     } finally {
       setIsLoading(false);
     }
@@ -220,6 +217,7 @@ export function Stwipe() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Removed error display */}
         {!session && (
           <div className="mb-6">
             <Button
@@ -341,9 +339,9 @@ export function Stwipe() {
           </form>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col items-center">
         <Button
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white mb-4"
           onClick={handleSubmit}
           disabled={!isFormValid || isLoading || selectedCard == null}
         >
@@ -356,6 +354,11 @@ export function Stwipe() {
             "Pay Now"
           )}
         </Button>
+        {error && (
+          <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
+            {error}
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
