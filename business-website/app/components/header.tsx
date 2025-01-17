@@ -28,7 +28,7 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href="#services"
+                href="/print"
                 className="hover:text-blue-400 transition duration-300"
               >
                 Print
@@ -36,7 +36,7 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href="#contact"
+                href="/contact"
                 className="hover:text-blue-400 transition duration-300"
               >
                 Contact
