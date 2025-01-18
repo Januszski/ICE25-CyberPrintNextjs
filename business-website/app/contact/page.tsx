@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
@@ -108,7 +103,8 @@ export default function ContactPage() {
               <div className="text-center text-white">
                 <h2 className="text-2xl font-semibold mb-4">Thank You!</h2>
                 <p>
-                  We've received your message and will get back to you soon.
+                  We`&apos;`ve received your message and will get back to you
+                  soon.
                 </p>
               </div>
             ) : (

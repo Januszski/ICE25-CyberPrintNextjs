@@ -12,7 +12,7 @@ const orderSchema = z.object({
   amount: z.any(),
   productName: z.string(),
   fileName: z.string(),
-  email: z.string().email().optional(),
+  email: z.string().email().optional().nullable(),
 });
 
 export async function POST(req: NextRequest) {

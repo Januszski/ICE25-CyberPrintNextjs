@@ -19,7 +19,7 @@ export default function Home() {
         <main className="container mx-auto px-4 py-12">
           <section className="text-center mb-16">
             <h1 className="text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-              Welcome to 3D Print Pro
+              Welcome to CyberPrint
             </h1>
             <p className="text-2xl mb-8 text-gray-300">
               Your gateway to cutting-edge 3D printing solutions

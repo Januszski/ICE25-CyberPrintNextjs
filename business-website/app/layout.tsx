@@ -5,6 +5,7 @@ import Header from "./components/header";
 import Footer from "./components/footer";
 import { Providers } from "./Providers";
 import SessionGuard from "./SessionGuard";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "3D printing page",
+  title: "CyberPrint",
   description: "A business page for 3D printing as a service",
 };
 
@@ -33,9 +34,11 @@ export default function RootLayout({
       >
         <Providers>
           <SessionGuard>
-            <Header />
-            {children}
-            <Footer />
+            <Suspense>
+              <Header />
+              {children}
+              <Footer />
+            </Suspense>
           </SessionGuard>
         </Providers>
       </body>

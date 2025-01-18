@@ -13,13 +13,22 @@ import { useAtom } from "jotai";
 import { orderDetailsAtom } from "../atom";
 import { PaidOrderScreen } from "../components/paid-order-screen";
 
+interface Order {
+  paid: boolean;
+  product_name: string;
+  price: string;
+}
+
+export interface OrderData {
+  order: Order;
+}
 export default function PaymentPage() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
-  const [orderData, setOrderData] = useState(null);
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [orderDetails, setOrderDetails] = useAtom(orderDetailsAtom);
+  const [error, setError] = useState("");
+  const [, setOrderDetails] = useAtom(orderDetailsAtom);
   const SERVICE_FEE = 7.25;
 
   useEffect(() => {
@@ -36,14 +45,18 @@ export default function PaymentPage() {
         setOrderData(data);
         setOrderDetails(data);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error has ocurred");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrderInfo();
-  }, [orderId]);
+  }, [orderId, setOrderDetails]);
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -63,7 +76,7 @@ export default function PaymentPage() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         <h1 className="text-5xl font-bold text-center mb-12 text-white tracking-tight">
-          Complete Your 3D Printing Order 🖨️
+          Complete Your CyberPrint Order 🖨️
         </h1>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -95,7 +108,7 @@ export default function PaymentPage() {
                     <span className="font-bold">
                       $
                       {(
-                        parseFloat(orderData?.order?.price) + SERVICE_FEE
+                        parseFloat(orderData!.order.price!) + SERVICE_FEE
                       ).toFixed(2)}
                     </span>
                   </div>
@@ -126,7 +139,11 @@ export default function PaymentPage() {
                   </div>
                   <div className="flex items-center">
                     <Truck className="h-6 w-6 mr-3 text-blue-400" />
-                    <span>Express shipping to your doorstep</span>
+                    <span>
+                      Express shipping to your doorstep (don&apos;t worry about
+                      giving us your shipping information, it is for fate to
+                      decide that which you shall receive)
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -157,8 +174,10 @@ function LoadingState() {
     </div>
   );
 }
-
-function ErrorState({ message }) {
+interface ErrorStateProps {
+  message: string;
+}
+function ErrorState({ message }: ErrorStateProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center">
       <div className="text-center">

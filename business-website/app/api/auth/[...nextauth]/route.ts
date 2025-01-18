@@ -19,7 +19,7 @@ function requestRefreshOfAccessToken(token: JWT) {
   });
 }
 
-export const authOptions: AuthOptions = {
+const authOptions: AuthOptions = {
   providers: [
     KeycloakProvider({
       clientId: process.env.KEYCLOAK_CLIENT_ID,

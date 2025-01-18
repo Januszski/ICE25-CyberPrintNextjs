@@ -5,17 +5,9 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { CheckCircle } from "lucide-react";
+import { OrderData } from "../payment/page";
 
-interface PaidOrderScreenProps {
-  orderData: {
-    order: {
-      product_name: string;
-      price: string;
-    };
-  };
-}
-
-export function PaidOrderScreen({ orderData }: PaidOrderScreenProps) {
+export function PaidOrderScreen({ orderData }: { orderData: OrderData }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
