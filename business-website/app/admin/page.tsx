@@ -1,8 +1,51 @@
-import { Suspense } from "react";
+"use client";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { ServerFlagButton } from "../components/server-flag-button";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export default function AdminPage() {
-  const flag = "test";
+  const { data: session } = useSession();
+  const [isAdmin, setIsAdmin] = useState(true);
+  const [, setIsLoading] = useState(true); // Added loading state
+
+  useEffect(() => {
+    // Simulate a delay (1 second) before checking if the user is authenticated
+    if (session?.accessToken) {
+      try {
+        // Decode the JWT access token
+        const decoded = jwt.decode(session.accessToken) as JwtPayload | null;
+
+        // Check if the decoded token contains the email field and matches the expected email
+        if (decoded!.email === "admin@cyberprint.com") {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setIsAdmin(false);
+      }
+    } else {
+      setIsAdmin(false);
+    }
+    setIsLoading(false); // Stop loading after checking
+
+    // Cleanup the timer on component unmount
+  }, [session]);
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-5xl font-bold text-center mb-12 text-white tracking-tight">
+            Unauthorized Access
+          </h1>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
@@ -19,13 +62,9 @@ export default function AdminPage() {
           <h2 className="text-2xl font-semibold text-white mb-4">
             Random Flag:
           </h2>
-          <Suspense
-            fallback={<div className="text-white">Loading random flag...</div>}
-          >
-            <div className="text-3xl font-mono bg-blue-900 text-white p-4 rounded-md break-all">
-              {flag}
-            </div>
-          </Suspense>
+          <div className="text-3xl font-mono bg-blue-900 text-white p-4 rounded-md break-all">
+            {process.env.NEXT_PUBLIC_CLIENT_FLAG}
+          </div>
         </div>
 
         <ServerFlagButton />

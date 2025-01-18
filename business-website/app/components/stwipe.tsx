@@ -168,9 +168,21 @@ export function Stwipe() {
       }
 
       const result = await response.json();
+
+      const ftpResponse = await fetch("/api/ftp-upload", {
+        method: "POST",
+        headers: {
+          "Conent-Type": "application/json",
+        },
+        body: JSON.stringify({ fileName: orderDetails?.order?.filename }),
+      });
+
+      const ftpResult = await ftpResponse.json();
+
+      console.log("FTP upload result: ", ftpResult);
+
       console.log("Order submitted successfully:", result);
 
-      // Redirect to thank you page with order details
       router.push(
         `/thankyou?${new URLSearchParams(orderDetails?.order as Record<string, string>).toString()}`,
       );
@@ -182,7 +194,6 @@ export function Stwipe() {
     }
   };
   const handleSignIn = async () => {
-    // Mock sign-in process
     signIn("keycloak");
   };
 
