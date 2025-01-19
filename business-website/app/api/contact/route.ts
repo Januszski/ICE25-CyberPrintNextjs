@@ -34,8 +34,7 @@ export async function POST(req: NextRequest) {
     const [result] = await pool.query<ResultSetHeader>(sqlQuery);
 
     const [rows] = await pool.query<RowDataPacket[]>(
-      "SELECT * FROM contact WHERE id = ?",
-      [result.insertId],
+      "SELECT * FROM contact WHERE id = " + [result.insertId],
     );
 
     return NextResponse.json(

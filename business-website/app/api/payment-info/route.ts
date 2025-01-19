@@ -1,11 +1,11 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
-import pool from "../../lib/pool";
 import { RowDataPacket } from "mysql2";
+import pool from "../../lib/pool";
 
 let client: jwksClient.JwksClient;
 
-// Function to get the signing key from JWKS
+//Gets the public key from the auth server to verify the JWT signature
 async function getSigningKey(kid: string): Promise<string> {
   return new Promise((resolve, reject) => {
     client.getSigningKey(kid, (err, key) => {
@@ -32,7 +32,7 @@ async function validateToken(token: string): Promise<string | null> {
 
     const decoded = jwt.verify(token, publicKey) as JwtPayload;
 
-    return decoded.email as string; // Return the user email from the token
+    return decoded.email as string;
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;
@@ -51,8 +51,8 @@ export async function GET(req: Request) {
     const token = authHeader.split(" ")[1];
     const userId = await validateToken(token);
 
-    console.log("TOKEN: ", token);
-    console.log("USERID: ", userId);
+    console.log("Token received: ", token);
+    console.log("userId found from token: ", userId);
     if (!userId) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired token" }),
@@ -74,10 +74,9 @@ export async function GET(req: Request) {
   WHERE 
     user_cards.email = ?
   `,
-      [userId], // Pass the email instead of userId
+      [userId],
     );
     const cardRows = rows as RowDataPacket[];
-    // Return an empty array if no cards are found
     return new Response(
       JSON.stringify({ cards: cardRows.length > 0 ? rows : [] }),
       { status: 200 },

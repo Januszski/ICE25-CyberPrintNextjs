@@ -48,6 +48,7 @@ const authOptions: AuthOptions = {
 
         return token;
       }
+      //this is handling refreshing token
       if (Date.now() < (token.expiresAt as number) * 1000 - 60 * 1000) {
         return token;
       } else {
@@ -59,7 +60,7 @@ const authOptions: AuthOptions = {
           if (!response.ok) throw tokens;
 
           const updatedToken: JWT = {
-            ...token, // Keep the previous token properties
+            ...token,
             idToken: tokens.id_token,
             accessToken: tokens.access_token,
             expiresAt: Math.floor(

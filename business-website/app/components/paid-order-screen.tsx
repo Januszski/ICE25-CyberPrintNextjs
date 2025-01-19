@@ -1,10 +1,10 @@
+import { CheckCircle } from "lucide-react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { CheckCircle } from "lucide-react";
 import { OrderData } from "../payment/page";
 
 export function PaidOrderScreen({ orderData }: { orderData: OrderData }) {

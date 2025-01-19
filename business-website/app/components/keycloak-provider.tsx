@@ -1,5 +1,4 @@
-// components/KeycloakProvider.tsx
-"use client"; // Required for client-side code
+"use client";
 
 import { useEffect } from "react";
 import { initializeKeycloak } from "../lib/keycloak";

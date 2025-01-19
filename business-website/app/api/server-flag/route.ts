@@ -1,9 +1,4 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
-import jwksClient from "jwks-rsa";
-import pool from "../../lib/pool";
-import { RowDataPacket } from "mysql2";
-
-let client: jwksClient.JwksClient;
 
 async function validateToken(token: string): Promise<string | null> {
   try {
@@ -11,14 +6,13 @@ async function validateToken(token: string): Promise<string | null> {
     if (!decoded || typeof decoded === "string") {
       throw new Error("Invalid token format");
     }
-
     const payload = decoded.payload as JwtPayload & { email?: string };
 
     if (!payload.email) {
       throw new Error("Email field not found in token");
     }
 
-    return payload.email; // Return the email field
+    return payload.email;
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;
@@ -33,15 +27,11 @@ export async function GET(req: Request) {
         { status: 401 },
       );
     }
-    console.log("WE have auth header");
 
     const token = authHeader.split(" ")[1];
     const userId = await validateToken(token);
 
-    console.log("USERID is: ", userId);
-
-    console.log("TOKEN: ", token);
-    console.log("USERID: ", userId);
+    console.log("userId is: ", userId);
     if (!userId) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired token" }),
@@ -55,7 +45,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Query to get the card info associated with the user
     return new Response(JSON.stringify({ flag: process.env.SERVER_FLAG }), {
       status: 200,
     });

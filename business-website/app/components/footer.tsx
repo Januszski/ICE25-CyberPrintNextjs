@@ -25,10 +25,10 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#services"
+                  href="/print"
                   className="hover:text-blue-400 transition duration-300"
                 >
-                  Services
+                  Print
                 </Link>
               </li>
               <li>

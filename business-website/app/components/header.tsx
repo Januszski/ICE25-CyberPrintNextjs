@@ -1,10 +1,10 @@
 "use client";
-import Link from "next/link";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { PrinterIcon as Printer3d } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
-import federatedLogout from "../lib/federatedLogout";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import federatedLogout from "../lib/federatedLogout";
 export default function Header() {
   const { data: session } = useSession();
   const [isAdmin, setIsAdmin] = useState(false);

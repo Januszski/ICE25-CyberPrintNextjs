@@ -1,8 +1,8 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
-import { useSession } from "next-auth/react";
 
 export function ServerFlagButton() {
   const [serverFlag, setServerFlag] = useState<string | null>(null);
@@ -13,9 +13,9 @@ export function ServerFlagButton() {
   const fetchServerFlag = async () => {
     setIsLoading(true);
     setError(null);
-    const token = session?.accessToken; // Get the token from session
+    const token = session?.accessToken;
 
-    console.log("THIS IS MY TOKEN ADMIN: ", token);
+    console.log("Fetching with this token: ", token);
     if (!token) {
       setError("No token found");
       setIsLoading(false);
@@ -24,10 +24,10 @@ export function ServerFlagButton() {
 
     try {
       const response = await fetch("/api/server-flag", {
-        method: "GET", // Assuming GET request, change if needed
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Add token to Authorization header
+          Authorization: `Bearer ${token}`,
         },
       });
 

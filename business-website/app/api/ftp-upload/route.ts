@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
 import ftp from "basic-ftp";
-import pool from "../../lib/pool";
 import { FieldPacket, RowDataPacket } from "mysql2";
+import { NextResponse } from "next/server";
+import pool from "../../lib/pool";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -33,23 +34,26 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("filename to upload: ", fileName);
-    console.log("GUID IS: ", orderId);
-    const localFilePath = `/path/to/local/directory/${fileName}`; // Replace with your local directory
-    const remoteFilePath = `/remote/directory/${fileName}`; // Replace with your desired remote path
+    console.log("Filename for FTP upload: ", fileName);
+
+    const localDirectory = process.env.FTP_LOCAL_DIR;
+    const remoteDirectory = process.env.FTP_REMOTE_DIR;
+
+    console.log("Local path of FTP file: ", `${localDirectory}/${fileName}`);
+    console.log("Remote path of FTP file: ", `${remoteDirectory}/${fileName}`);
+    const localFilePath = `${localDirectory}/${fileName}`;
+    const remoteFilePath = `${remoteDirectory}/${fileName}`;
 
     const client = new ftp.Client();
 
     try {
-      // Connect to the FTP server
       await client.access({
-        host: "ftp.example.com", // Replace with your FTP server's host
-        user: "anonymous", // Replace with your FTP server's user
-        password: "", // Replace with your FTP server's password (empty for none)
-        secure: false, // Set to true if using FTPS
+        host: process.env.FTP_HOST,
+        user: process.env.FTP_USER,
+        password: process.env.FTP_PASSWORD,
+        secure: false,
       });
 
-      // Upload the file
       await client.uploadFrom(localFilePath, remoteFilePath);
 
       return NextResponse.json({ message: "File uploaded successfully" });

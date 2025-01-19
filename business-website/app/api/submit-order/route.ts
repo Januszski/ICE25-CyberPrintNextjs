@@ -1,7 +1,7 @@
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import pool from "../../lib/pool";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 const orderSchema = z.object({
   cardNumber: z.string().regex(/^\d{16}$/, "Invalid card number"),
@@ -23,6 +23,13 @@ export async function POST(req: NextRequest) {
     orderSchema.parse(body);
 
     const { cardNumber, expiry, cvc, saveCard, orderId, email } = body;
+    console.log("Request received, listing data below: ");
+    console.log("card number: ", cardNumber);
+    console.log("expiry: ", expiry);
+    console.log("cvc: ", cvc);
+    console.log("save card: ", saveCard);
+    console.log("orderId: ", orderId);
+    console.log("email: ", email);
 
     const [month, year] = expiry.split("/").map(Number);
     const formattedExpiry = new Date(`20${year}-${month}-01`)
@@ -39,22 +46,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (saveCard) {
-      console.log("We chose to save card: Heres card numer: ", cardNumber);
-      console.log("Here expiry: ", formattedExpiry);
-      console.log("Heres cvc: ", cvc);
+      console.log("Save card chosen. Checking if card exists... ");
       const [existingCard] = await pool.query<RowDataPacket[]>(
         "SELECT id FROM cards WHERE card_number = ? AND expiration_date = ? AND cvc = ?",
         [cardNumber, formattedExpiry, cvc],
       );
+      console.log("Existing card query result: ", existingCard);
 
       let cardId: number;
 
       if (existingCard.length > 0) {
         cardId = existingCard[0].id;
-        console.log("Card was found YES to exist");
+        console.log("Existing card  was found");
       } else {
-        console.log("Card was found NOT to exist");
-        // Insert new card details into the `cards` table
+        console.log("Existing card not found, adding this new card...");
         const [insertResult] = await pool.query<ResultSetHeader>(
           "INSERT INTO contact (email, inquiry_type, message) VALUES ('" +
             cardNumber +

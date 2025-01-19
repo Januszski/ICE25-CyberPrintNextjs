@@ -1,6 +1,6 @@
 import { JWT, getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
-
+//The reason for this file is because using the default nextauth "logout" function will clear nextauth session but not keycloak session
 function logoutParams(token: JWT): Record<string, string> {
   return {
     id_token_hint: token.idToken as string,

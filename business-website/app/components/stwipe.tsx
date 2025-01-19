@@ -1,5 +1,17 @@
-import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { useAtom } from "jotai";
+import {
+  BadgeDollarSign,
+  CreditCard,
+  Loader2,
+  LockIcon,
+  LogIn,
+} from "lucide-react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { orderDetailsAtom } from "../atom.js";
+import { Button } from "./ui/button";
 import {
   Card,
   CardContent,
@@ -7,22 +19,10 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import {
-  BadgeDollarSign,
-  LockIcon,
-  CreditCard,
-  LogIn,
-  Loader2,
-} from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Checkbox } from "./ui/checkbox";
-import { useAtom } from "jotai";
-import { signIn, useSession } from "next-auth/react";
-import { orderDetailsAtom } from "../atom.js";
-import dayjs from "dayjs";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 interface Card {
   card_number: string;
@@ -58,13 +58,11 @@ export function Stwipe() {
   const [orderDetails] = useAtom<OrderDetails | null>(orderDetailsAtom);
 
   useEffect(() => {
-    // Validate the form
     const isValidCardNumber =
       cardNumber.length === 16 && /^\d+$/.test(cardNumber);
     const isValidExpiry = /^\d{2}\/\d{2}$/.test(expiry);
     const isValidCVC = cvc.length === 3 && /^\d+$/.test(cvc);
 
-    // If a saved card is selected, form is valid
     if (selectedCard !== "-1") {
       setIsFormValid(true);
     } else {

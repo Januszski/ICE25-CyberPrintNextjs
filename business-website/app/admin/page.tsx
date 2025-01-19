@@ -7,14 +7,13 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 export default function AdminPage() {
   const { data: session } = useSession();
   const [isAdmin, setIsAdmin] = useState(true);
-  const [, setIsLoading] = useState(true); // Added loading state
 
   useEffect(() => {
     if (session?.accessToken) {
       try {
         const decoded = jwt.decode(session.accessToken) as JwtPayload | null;
 
-        if (decoded!.email === "admin@cyberprint.com") {
+        if (decoded!.email.toLowerCase() == "admin@cyberprint.com") {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);
@@ -26,7 +25,6 @@ export default function AdminPage() {
     } else {
       setIsAdmin(false);
     }
-    setIsLoading(false);
   }, [session]);
 
   if (!isAdmin) {
