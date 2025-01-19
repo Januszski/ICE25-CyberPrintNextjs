@@ -1,5 +1,10 @@
 "use client";
+import { useAtom } from "jotai";
+import { Package, PrinterIcon as Printer3D, Truck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { orderDetailsAtom } from "../atom";
+import { PaidOrderScreen } from "../components/paid-order-screen";
 import { Stwipe } from "../components/stwipe";
 import {
   Card,
@@ -7,11 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { PrinterIcon as Printer3D, Package, Truck } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
-import { orderDetailsAtom } from "../atom";
-import { PaidOrderScreen } from "../components/paid-order-screen";
 
 interface Order {
   paid: boolean;
@@ -41,7 +41,6 @@ export default function PaymentPage() {
           throw new Error("Failed to fetch order information");
         }
         const data = await response.json();
-        console.log("ORDER DATA ", data);
         setOrderData(data);
         setOrderDetails(data);
       } catch (err) {
@@ -68,7 +67,6 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Complex background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0iIzFhMjAzYSI+PC9yZWN0Pgo8Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyMCIgc3Ryb2tlPSIjMmE0MjdmIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiPjwvY2lyY2xlPgo8Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIxMCIgc3Ryb2tlPSIjM2E2M2JmIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiPjwvY2lyY2xlPgo8bGluZSB4MT0iMzAiIHkxPSIwIiB4Mj0iMzAiIHkyPSI2MCIgc3Ryb2tlPSIjMmE0MjdmIiBzdHJva2Utd2lkdGg9IjEiPjwvbGluZT4KPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjYwIiB5Mj0iMzAiIHN0cm9rZT0iIzJhNDI3ZiIgc3Ryb2tlLXdpZHRoPSIxIj48L2xpbmU+Cjwvc3ZnPg==')] opacity-10"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 mix-blend-overlay"></div>
@@ -141,8 +139,7 @@ export default function PaymentPage() {
                     <Truck className="h-6 w-6 mr-3 text-blue-400" />
                     <span>
                       Express shipping to your doorstep (don&apos;t worry about
-                      giving us your shipping information, it is for fate to
-                      decide that which you shall receive)
+                      giving us your shipping information, we already know it)
                     </span>
                   </div>
                 </div>

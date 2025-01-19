@@ -1,4 +1,3 @@
-// lib/keycloak.js
 import Keycloak from "keycloak-js";
 
 const initOptions = {

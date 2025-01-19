@@ -16,7 +16,8 @@ export async function GET(req: NextRequest) {
 
     console.log("Selecting * from the following order: ", orderGuid);
     const [rows]: [RowDataPacket[], FieldPacket[]] = await pool.query(
-      "SELECT * FROM orders WHERE guid = " + orderGuid,
+      "SELECT * FROM orders WHERE guid = ?",
+      [orderGuid],
     );
 
     if (rows.length === 0) {

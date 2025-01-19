@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { AlertCircle, Loader2, SendIcon } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,9 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Button } from "../components/ui/button";
-import { Loader2, SendIcon, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "../components/ui/alert";
+import { Textarea } from "../components/ui/textarea";
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,10 +47,9 @@ export default function ContactPage() {
     event.preventDefault();
     const form = event.currentTarget;
     const email = form.email.value;
-    const inquiryType = form.inquiryType.value; // Assuming there's an inquiryType field in the form
+    const inquiryType = form.inquiryType.value;
     const message = form.message.value;
 
-    // Validate input
     if (!validateEmail(email) || !validateMessage(message)) {
       return;
     }
@@ -58,7 +57,6 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      // Send data to the backend
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
@@ -71,10 +69,6 @@ export default function ContactPage() {
         throw new Error("Failed to submit the form");
       }
 
-      const result = await response.json();
-      console.log("Form submitted successfully:", result);
-
-      // Update UI to show success
       setSubmitted(true);
     } catch (error) {
       console.error("Error submitting the form:", error);
@@ -85,7 +79,6 @@ export default function ContactPage() {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Updated background pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0iIzBmMTcyYSI+PC9yZWN0Pgo8Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyMCIgc3Ryb2tlPSIjMWUzYThhIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiPjwvY2lyY2xlPgo8cGF0aCBkPSJNMzAgMTBMMTAgMzBMNDAgNTBMNjAgMzBMMzAgMTAiIHN0cm9rZT0iIzFkNGVkOCIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIj48L3BhdGg+Cjwvc3ZnPg==')] opacity-10"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-blue-400/10 to-blue-300/10 mix-blend-overlay"></div>
@@ -103,7 +96,7 @@ export default function ContactPage() {
               <div className="text-center text-white">
                 <h2 className="text-2xl font-semibold mb-4">Thank You!</h2>
                 <p>
-                  We`&apos;`ve received your message and will get back to you
+                  We&apos;ve received your message and will get back to you
                   soon.
                 </p>
               </div>

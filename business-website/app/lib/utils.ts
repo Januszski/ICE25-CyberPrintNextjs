@@ -9,10 +9,10 @@ export const cookies = {
   sessionToken: {
     name: `next-auth.session-token.0`,
     options: {
-      httpOnly: false,
+      httpOnly: !!0,
       sameSite: "lax",
       path: "/",
-      secure: false,
+      secure: !!0,
     },
   },
 };

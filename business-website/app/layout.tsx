@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Header from "./components/header";
+import { Suspense } from "react";
 import Footer from "./components/footer";
+import Header from "./components/header";
+import "./globals.css";
 import { Providers } from "./Providers";
 import SessionGuard from "./SessionGuard";
-import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CyberPrint",
-  description: "A business page for 3D printing as a service",
+  description: "A cybernetic exercise",
 };
 
 export default function RootLayout({

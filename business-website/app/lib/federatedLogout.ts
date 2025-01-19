@@ -1,4 +1,3 @@
-// src/utils/federatedLogout.ts
 import { signOut } from "next-auth/react";
 
 export default async function federatedLogout() {

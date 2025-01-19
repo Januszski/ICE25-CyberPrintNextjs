@@ -75,7 +75,6 @@ export function Stwipe() {
 
   useEffect(() => {
     const token = session?.accessToken;
-    console.log("TOKEN ACCESS HERE ", token);
     const fetchPaymentInfo = async () => {
       try {
         const response = await fetch(`/api/payment-info`, {
@@ -88,7 +87,6 @@ export function Stwipe() {
           throw new Error("Failed to fetch order information");
         }
         const data = await response.json();
-        console.log("ORDER DATA ", data);
         setPaymentInfo(data);
       } catch (err) {
         if (err instanceof Error) {
@@ -104,22 +102,19 @@ export function Stwipe() {
     if (token) fetchPaymentInfo();
   }, [session, status]);
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ""); // Allow only digits
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 16) setCardNumber(value);
   };
   const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
 
-    // Remove non-digit characters
     value = value.replace(/\D/g, "");
 
-    // Allow deletion without reformatting
     if (value.length <= 2) {
       setExpiry(value);
       return;
     }
 
-    // Format as MM / YY
     if (value.length > 2) {
       value = value.slice(0, 2) + "/" + value.slice(2, 4);
     }
@@ -127,7 +122,7 @@ export function Stwipe() {
     setExpiry(value);
   };
   const handleCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ""); // Allow only digits
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 3) setCvc(value);
   };
   const handleSubmit = async (event: React.FormEvent) => {
@@ -136,10 +131,10 @@ export function Stwipe() {
 
     const fallbackSelectedCard: number = parseInt(selectedCard!) ?? 0;
     const submitData = {
-      orderId: orderDetails?.order?.guid, // Replace with actual data from your atom
-      amount: parseFloat(orderDetails?.order?.price as string), // Replace with actual data from your atom
-      productName: orderDetails?.order?.product_name, // Replace with actual data from your atom
-      fileName: orderDetails?.order?.filename, // Replace with actual data from your atom
+      orderId: orderDetails?.order?.guid,
+      amount: parseFloat(orderDetails?.order?.price as string),
+      productName: orderDetails?.order?.product_name,
+      fileName: orderDetails?.order?.filename,
       cardNumber:
         paymentInfo?.cards[fallbackSelectedCard]?.card_number || cardNumber,
       expiry:
@@ -150,9 +145,8 @@ export function Stwipe() {
       email: session?.user?.email || null,
       saveCard,
     };
-    console.log("THIS IS WHAT IM SENDING: ", JSON.stringify(submitData));
+    console.log("Submitting this data: ", JSON.stringify(submitData));
     try {
-      // Send order details to your backend
       const response = await fetch("/api/submit-order", {
         method: "POST",
         headers: {
@@ -180,9 +174,8 @@ export function Stwipe() {
 
       const ftpResult = await ftpResponse.json();
 
+      console.log("Order submission result: ", result);
       console.log("FTP upload result: ", ftpResult);
-
-      console.log("Order submitted successfully:", result);
 
       router.push(
         `/thankyou?${new URLSearchParams(orderDetails?.order as Record<string, string>).toString()}`,
@@ -216,18 +209,6 @@ export function Stwipe() {
 
   return (
     <Card className="w-full max-w-md bg-gradient-to-br from-gray-800 to-blue-900 shadow-xl border border-blue-500/20">
-      <Button
-        onClick={() => {
-          console.log("AUTHENITCATED? ", status);
-          console.log("INFO", session);
-          console.log("isFormValid: ", isFormValid);
-          console.log("isLoading: ", isLoading);
-          console.log("selectedCard: ", selectedCard);
-        }}
-      >
-        {" "}
-        TEST BUTTON
-      </Button>
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-white">
           <span className="flex items-center">
@@ -236,16 +217,18 @@ export function Stwipe() {
           </span>
           <LockIcon className="h-5 w-5 text-green-400" />
         </CardTitle>
+        <div className="text-xs text-gray-400 mt-1">
+          *Don&apos;t enter real card information
+        </div>
       </CardHeader>
       <CardContent>
-        {/* Removed error display */}
         {!session && (
           <div className="mb-6">
             <Button
               onClick={handleSignIn}
-              className="w-full mb-2 bg-blue-600 hover:bg-blue-700"
+              className="w-full mb-2 bg-blue-600 hover:bg-blue-700 text-white"
             >
-              <LogIn className="mr-2 h-4 w-4" /> Sign In
+              <LogIn className="mr-2 h-4 w-4 text-white" /> Sign In
             </Button>
             <p className="text-center text-sm text-blue-200">
               or continue as guest
@@ -261,7 +244,6 @@ export function Stwipe() {
               onValueChange={setSelectedCard}
               className="space-y-3"
             >
-              {/* Render saved cards if available */}
               {paymentInfo.cards.length > 0 &&
                 paymentInfo.cards.map((card, index) => (
                   <Label
@@ -281,7 +263,6 @@ export function Stwipe() {
                   </Label>
                 ))}
 
-              {/* Always render the "Use a new card" option */}
               <Label
                 htmlFor="new-card"
                 className="flex items-center space-x-3 bg-gray-700/30 p-3 rounded-md cursor-pointer hover:bg-gray-600/30 transition-colors"
