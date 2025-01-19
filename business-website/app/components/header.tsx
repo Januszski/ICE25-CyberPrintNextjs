@@ -3,8 +3,29 @@ import Link from "next/link";
 import { PrinterIcon as Printer3d } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import federatedLogout from "../lib/federatedLogout";
+import { useEffect, useState } from "react";
+import jwt, { JwtPayload } from "jsonwebtoken";
 export default function Header() {
   const { data: session } = useSession();
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    if (session?.accessToken) {
+      try {
+        const decoded = jwt.decode(session.accessToken) as JwtPayload | null;
+
+        if (decoded!.email === "admin@cyberprint.com") {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setIsAdmin(false);
+      }
+    } else {
+      setIsAdmin(false);
+    }
+  }, [session]);
   return (
     <header className="bg-gray-800 text-white shadow-lg border-b border-blue-500">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -16,6 +37,16 @@ export default function Header() {
         </Link>
         <nav>
           <ul className="flex gap-6 text-lg">
+            {isAdmin && (
+              <li>
+                <Link
+                  href="/admin"
+                  className="hover:text-blue-400 transition duration-300"
+                >
+                  Admin
+                </Link>
+              </li>
+            )}
             <li>
               <Link
                 href="/"

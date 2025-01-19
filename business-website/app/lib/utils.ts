@@ -4,3 +4,15 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const cookies = {
+  sessionToken: {
+    name: `next-auth.session-token.0`,
+    options: {
+      httpOnly: false,
+      sameSite: "lax",
+      path: "/",
+      secure: false,
+    },
+  },
+};

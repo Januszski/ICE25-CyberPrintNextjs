@@ -10,13 +10,10 @@ export default function AdminPage() {
   const [, setIsLoading] = useState(true); // Added loading state
 
   useEffect(() => {
-    // Simulate a delay (1 second) before checking if the user is authenticated
     if (session?.accessToken) {
       try {
-        // Decode the JWT access token
         const decoded = jwt.decode(session.accessToken) as JwtPayload | null;
 
-        // Check if the decoded token contains the email field and matches the expected email
         if (decoded!.email === "admin@cyberprint.com") {
           setIsAdmin(true);
         } else {
@@ -29,9 +26,7 @@ export default function AdminPage() {
     } else {
       setIsAdmin(false);
     }
-    setIsLoading(false); // Stop loading after checking
-
-    // Cleanup the timer on component unmount
+    setIsLoading(false);
   }, [session]);
 
   if (!isAdmin) {

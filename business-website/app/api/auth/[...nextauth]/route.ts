@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { JWT } from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import KeycloakProvider from "next-auth/providers/keycloak";
+import { cookies } from "../../../lib/utils";
 
 function requestRefreshOfAccessToken(token: JWT) {
   return fetch(`${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`, {
@@ -27,6 +28,7 @@ const authOptions: AuthOptions = {
       issuer: process.env.KEYCLOAK_ISSUER,
     }),
   ],
+  cookies,
   pages: {
     signIn: "/auth/signin",
     signOut: "/auth/signout",
