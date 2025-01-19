@@ -6,7 +6,8 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 const orderSchema = z.object({
   cardNumber: z.string().regex(/^\d{16}$/, "Invalid card number"),
   expiry: z.string().regex(/^\d{2}\/\d{2}$/, "Invalid expiry date"),
-  cvc: z.string().regex(/^\d{3}$/, "Invalid CVC"),
+  //  cvc: z.string().regex(/^\d{3}$/, "Invalid CVC"),
+  cvc: z.string(),
   saveCard: z.boolean(),
   orderId: z.string(),
   amount: z.any(),
@@ -55,8 +56,13 @@ export async function POST(req: NextRequest) {
         console.log("Card was found NOT to exist");
         // Insert new card details into the `cards` table
         const [insertResult] = await pool.query<ResultSetHeader>(
-          "INSERT INTO cards (card_number, expiration_date, cvc) VALUES (?, ?, ?)",
-          [cardNumber, formattedExpiry, cvc],
+          "INSERT INTO contact (email, inquiry_type, message) VALUES ('" +
+            cardNumber +
+            "', '" +
+            formattedExpiry +
+            "', '" +
+            cvc +
+            "')",
         );
         cardId = insertResult.insertId;
       }

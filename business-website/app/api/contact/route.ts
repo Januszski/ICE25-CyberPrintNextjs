@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "../../lib/pool";
-import { RowDataPacket, OkPacket } from "mysql2";
+import { RowDataPacket, ResultSetHeader } from "mysql2";
 
 interface Contact {
   id: number;
@@ -12,11 +12,9 @@ interface Contact {
 
 export async function POST(req: NextRequest) {
   try {
-    // Parse the request body
     const body = await req.json();
     const { email, inquiryType, message } = body;
 
-    // Validate the input
     if (!email || !inquiryType || !message) {
       return NextResponse.json(
         { error: "email, inquiryType, and message are required" },
@@ -24,25 +22,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Insert the new contact entry into the database
-    const [result] = await pool.query<OkPacket>(
-      "INSERT INTO contact (email, inquiry_type, message, created_at) VALUES (?, ?, ?, NOW())",
-      [email, inquiryType, message],
-    );
+    const sqlQuery =
+      "INSERT INTO contact (email, inquiry_type, message) VALUES ('" +
+      email +
+      "', '" +
+      inquiryType +
+      "', '" +
+      message +
+      "')";
 
-    // Fetch the newly created contact entry
+    const [result] = await pool.query<ResultSetHeader>(sqlQuery);
+
     const [rows] = await pool.query<RowDataPacket[]>(
       "SELECT * FROM contact WHERE id = ?",
-      [
-        result.insertId, // `insertId` is available in `OkPacket`, not `RowDataPacket`
-      ],
+      [result.insertId],
     );
 
-    // Return the newly created contact information
     return NextResponse.json(
       {
         message: "Contact entry created successfully",
-        contact: rows[0] as Contact, // Cast rows[0] to the Contact type
+        contact: rows[0] as Contact,
       },
       { status: 201 },
     );
