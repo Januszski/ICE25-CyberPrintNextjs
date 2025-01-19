@@ -174,7 +174,10 @@ export function Stwipe() {
         headers: {
           "Conent-Type": "application/json",
         },
-        body: JSON.stringify({ fileName: orderDetails?.order?.filename }),
+        body: JSON.stringify({
+          fileName: orderDetails?.order?.filename,
+          orderId: orderDetails?.order?.guid,
+        }),
       });
 
       const ftpResult = await ftpResponse.json();

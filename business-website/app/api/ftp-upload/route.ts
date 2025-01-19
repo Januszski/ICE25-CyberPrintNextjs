@@ -1,19 +1,40 @@
 import { NextResponse } from "next/server";
 import ftp from "basic-ftp";
-
+import pool from "../../lib/pool";
+import { FieldPacket, RowDataPacket } from "mysql2";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { fileName } = body;
+    const { fileName, orderId } = body;
 
-    if (!fileName) {
+    if (!fileName || !orderId) {
       return NextResponse.json(
-        { message: "fileName is required in the request body" },
+        { message: "fileName and orderId is required in the request body" },
         { status: 400 },
       );
     }
 
+    const [rows]: [RowDataPacket[], FieldPacket[]] = await pool.query(
+      "SELECT * FROM orders WHERE guid = ?",
+      [orderId],
+    );
+
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    if (!rows[0].paid) {
+      return NextResponse.json(
+        {
+          message: "Order has not been paid for",
+          error: "Order has not been paid for",
+        },
+        { status: 402 },
+      );
+    }
+
     console.log("filename to upload: ", fileName);
+    console.log("GUID IS: ", orderId);
     const localFilePath = `/path/to/local/directory/${fileName}`; // Replace with your local directory
     const remoteFilePath = `/remote/directory/${fileName}`; // Replace with your desired remote path
 

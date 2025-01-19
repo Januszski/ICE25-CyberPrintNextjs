@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Order created successfully",
+        message: "Order retrieved successfully",
         order: {
           ...rows[0],
           price: parseFloat(rows[0].price).toFixed(2), // Ensure the price is a number with 2 decimal places
