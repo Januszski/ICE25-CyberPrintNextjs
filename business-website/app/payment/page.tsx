@@ -139,7 +139,7 @@ export default function PaymentPage() {
                     <Truck className="h-6 w-6 mr-3 text-blue-400" />
                     <span>
                       Express shipping to your doorstep (don&apos;t worry about
-                      giving us your shipping information, we already know it)
+                      giving us your shipping information, we&apos;ll find you)
                     </span>
                   </div>
                 </div>

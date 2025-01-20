@@ -143,7 +143,7 @@ export function Stwipe() {
         ) || expiry,
       cvc: paymentInfo?.cards[fallbackSelectedCard]?.cvc || cvc,
       email: session?.user?.email || null,
-      saveCard,
+      saveCard: paymentInfo?.cards[fallbackSelectedCard] ? false : saveCard,
     };
     console.log("Submitting this data: ", JSON.stringify(submitData));
     try {

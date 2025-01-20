@@ -41,22 +41,26 @@ export default function Home() {
                   Cutting-edge Technology
                 </h3>
                 <p>
-                  We use the latest 3D printing technology to ensure the highest
+                  We use only the finest Belgian plastics to ensure the highest
                   quality prints for our customers.
                 </p>
               </div>
               <div className="bg-gray-800 bg-opacity-50 p-6 rounded-lg">
                 <h3 className="text-xl font-semibold mb-4">Expert Team</h3>
                 <p>
-                  Our team of 3D printing experts is always ready to assist you
-                  with any project or question.
+                  Our team of top-notch 3D printing experts will sit and watch
+                  the machine make your creation from beginning to end.
                 </p>
               </div>
               <div className="bg-gray-800 bg-opacity-50 p-6 rounded-lg">
                 <h3 className="text-xl font-semibold mb-4">Fast Turnaround</h3>
                 <p>
-                  We pride ourselves on quick delivery without compromising on
-                  quality.
+                  Leveraging cutting-edge AI-driven automation, scalable cloud
+                  infrastructure, and blockchain-based solutions, we ensure a
+                  lightning-fast turnaround by seamlessly integrating machine
+                  learning models, real-time data processing pipelines, and
+                  decentralized crypto technologies, empowering agile workflows
+                  and accelerating innovation.
                 </p>
               </div>
             </div>
