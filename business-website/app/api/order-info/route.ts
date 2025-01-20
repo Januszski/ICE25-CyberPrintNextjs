@@ -44,18 +44,16 @@ export async function GET(req: NextRequest) {
 }
 //Some function to generate a price based on file size, not too important
 const calculatePrice = (fileSize: number): number => {
-  const minPrice = 0.1;
-  const maxPrice = 1000;
-  const basePricePerMB = 0.05;
+  const fileSizeDigits = fileSize.toString().length;
 
-  const fileSizeInMB = fileSize / (1024 * 1024);
+  let price: number;
 
-  let price = fileSizeInMB * basePricePerMB;
-
-  if (price < minPrice) {
-    price = minPrice;
-  } else if (price > maxPrice) {
-    price = maxPrice;
+  if (fileSizeDigits <= 5) {
+    price = Math.random() * (15 - 5) + 5;
+  } else if (fileSizeDigits === 6) {
+    price = Math.random() * (25 - 15) + 15;
+  } else {
+    price = Math.random() * (50 - 25) + 25;
   }
 
   return price;

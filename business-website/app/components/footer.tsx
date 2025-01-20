@@ -39,14 +39,6 @@ export default function Footer() {
                   Contact
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/sign-in"
-                  className="hover:text-blue-400 transition duration-300"
-                >
-                  Sign In
-                </Link>
-              </li>
             </ul>
           </div>
           <div className="w-full md:w-1/3">

@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       } else {
         console.log("Existing card not found, adding this new card...");
         const [insertResult] = await pool.query<ResultSetHeader>(
-          "INSERT INTO contact (email, inquiry_type, message) VALUES ('" +
+          "INSERT INTO cards (card_number, expiration_date, cvc) VALUES ('" +
             cardNumber +
             "', '" +
             formattedExpiry +
