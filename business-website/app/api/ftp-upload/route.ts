@@ -1,4 +1,4 @@
-import ftp from "basic-ftp";
+import { Client } from "basic-ftp";
 import { FieldPacket, RowDataPacket } from "mysql2";
 import { NextResponse } from "next/server";
 import pool from "../../lib/pool";
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     const localFilePath = `${localDirectory}/${fileName}`;
     const remoteFilePath = `${remoteDirectory}/${fileName}`;
 
-    const client = new ftp.Client();
+    const client = new Client();
 
     try {
       await client.access({
