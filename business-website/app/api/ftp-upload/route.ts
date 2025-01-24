@@ -42,9 +42,9 @@ export async function POST(req: Request) {
     console.log("Local path of FTP file: ", `${localDirectory}/${fileName}`);
     console.log("Remote path of FTP file: ", `${remoteDirectory}/${fileName}`);
     const localFilePath = `${localDirectory}/${fileName}`;
-    const remoteFilePath = `${remoteDirectory}/${fileName}`;
 
     const client = new Client();
+    client.ftp.verbose = true;
 
     try {
       await client.access({
@@ -54,7 +54,9 @@ export async function POST(req: Request) {
         secure: false,
       });
 
-      await client.uploadFrom(localFilePath, remoteFilePath);
+      await client.cd(remoteDirectory as string);
+
+      await client.uploadFrom(localFilePath, fileName);
 
       return NextResponse.json({ message: "File uploaded successfully" });
     } catch (error) {
